@@ -1,0 +1,13 @@
+h1{
+    color:aqua;
+    font-family:'Times New Roman', Times, serif;
+}
+a{
+    color: chartreuse;
+}
+a:hover{
+    color: burlywood;
+}
+body{
+    background-color: blueviolet;
+}
