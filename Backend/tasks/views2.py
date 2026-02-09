@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django import forms
 from rest_framework import generics
+from rest_framework.viewsets import ModelViewSet
 from .models import Task
 from .serializers import TaskSerializer
 
@@ -34,3 +35,5 @@ class RetrieveUpdateDestroyTask(generics.RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     lookup_field = 'pk'
+
+class TaskViewSet(ModelViewSet):
