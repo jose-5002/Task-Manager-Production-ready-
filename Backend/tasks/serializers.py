@@ -29,7 +29,7 @@ class TaskSerializer(serializers.ModelSerializer):
         read_only_fields = ['owner','created_on', 'updated_on' ]
 
     def validate_due_on(self, value):
-        if value and value < timezone.now():
+        if value and value < timezone.now().date():
             raise serializers.ValidationError("Due date cannot be in the past.")
         return value
     
