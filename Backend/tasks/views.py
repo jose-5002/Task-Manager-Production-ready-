@@ -26,7 +26,7 @@ class login_view(TokenObtainPairView):
 #TASK
 class TaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
-    permission_classes = IsAuthenticated
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['status', 'priority']
     ordering_fields = [ 'due_on', 'priority', 'created_on']
@@ -88,11 +88,11 @@ def register_user(request):
     serializer = RegisterUserSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     serializer.save()
-    return Response({"message": "User registered successfully"+ serializer.data}, status=status.HTTP_201_CREATED)
+    return Response({"message": "User registered successfully", "user": serializer.data}, status=status.HTTP_201_CREATED)
 #Tag
 class TagViewSet(ModelViewSet):
     serializer_class = TagSerializer
-    permission_classes = IsAuthenticated
+    permission_classes = [IsAuthenticated]
 
 #Profile
 class ProfileViewSet(ModelViewSet):
