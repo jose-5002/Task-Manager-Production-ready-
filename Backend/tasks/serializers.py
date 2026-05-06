@@ -55,7 +55,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 #Sign up/ Register
 class RegisterUserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
 
     class Meta:
         model = User
