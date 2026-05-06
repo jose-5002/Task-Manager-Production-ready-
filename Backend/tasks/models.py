@@ -77,7 +77,9 @@ class OTP(models.Model):
     issued_at = models.DateTimeField(auto_now_add=True)
     is_used = models.BooleanField(default=False)
 
-    def is_valid(self):
+    def is_valid(self): 
+#         Implements a business rule directly on the model — a clean pattern called a model
+# method. The logic lives close to the data it describes
         expiration_time = self.issued_at + datetime.timedelta(minutes=2)
         return datetime.datetime.now(datetime.timezone.utc) < expiration_time and not self.is_used
     
