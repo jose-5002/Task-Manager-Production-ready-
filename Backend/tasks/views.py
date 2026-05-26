@@ -1,12 +1,13 @@
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
+from .permission import IsOwner
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet 
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 
-from .models import Task, Tag
+from .models import Task, Tag, Profile
 from rest_framework import serializers
 from .serializers import TaskSerializer, TagSerializer, CustomTokenPairSerializer, RegisterUserSerializer, ProfileSerializer, AssignTaskSerializer
 from django.contrib.auth import get_user_model
@@ -15,7 +16,6 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-
 
 User = get_user_model()
 
@@ -26,7 +26,7 @@ class login_view(TokenObtainPairView):
 #TASK
 class TaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['status', 'priority']
     ordering_fields = [ 'due_on', 'priority', 'created_on']
