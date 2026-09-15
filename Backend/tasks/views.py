@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.permissions import IsAuthenticated
-from .permission import IsOwner
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from .permission import IsOwner, IsProfileOwner, IsActiveUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet 
 from rest_framework import status
@@ -26,9 +26,15 @@ class login_view(TokenObtainPairView):
 #TASK
 class TaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
+
+    # def get_permissions(self):
+    #     if self.action == 'destroy' or self.action in ['assign', 'unassign']:
+    #         return [IsAdminUser()]
+    #     return [IsAuthenticated(), IsOwner()]
+    
     permission_classes = [IsAuthenticated, IsOwner]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ['status', 'priority']
+    filterset_fields = ['completed', 'priority']
     ordering_fields = [ 'due_on', 'priority', 'created_on']
 
     def get_queryset(self): # What data does he have access?
@@ -44,12 +50,9 @@ class TaskViewSet(ModelViewSet):
         task.save()
         return Response({"message": "Task marked as completed"}, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsActiveUser, IsOwner, IsAuthenticated])
     def assign(self, request, pk=None):
         task = self.get_object()
-        if request.user.status != 'active':
-            return Response({"error": "Only active users can assign tasks."}, status=status.HTTP_403_FORBIDDEN)
-        
         serializer = AssignTaskSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = User.objects.get(id=serializer.validated_data['user_id'])
@@ -84,6 +87,7 @@ class TaskViewSet(ModelViewSet):
 
 #Sign up/ Register
 @api_view(['POST'])
+@permission_classes([AllowAny]) 
 def register_user(request):
     serializer = RegisterUserSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -92,19 +96,25 @@ def register_user(request):
 #Tag
 class TagViewSet(ModelViewSet):
     serializer_class = TagSerializer
+    queryset = Tag.objects.all()
     permission_classes = [IsAuthenticated]
 
 #Profile
 class ProfileViewSet(ModelViewSet):
     serializer_class = ProfileSerializer
-    permission_classes = IsAuthenticated
+    permission_classes = [IsAuthenticated, IsProfileOwner]
+
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
 
     def get_queryset(self):
-        return User.objects.filter(user=self.request.user)
+        return Profile.objects.filter(user=self.request.user)
     
-    def get_object(self):
-        profile, _ = Profile.objects.get_or_create(user=self.request.user)
-        return profile
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 # @api_view(['POST'])
