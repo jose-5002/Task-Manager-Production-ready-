@@ -1,0 +1,29 @@
+# Secrets: never commit
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+
+# Celery
+celerybeat-schedule*
+celerybeat.pid
+
+# Editor / OS leftovers
+.vscode/
+.idea/
+Thumbs.db
+tempCodeRunnerFile.py
+
+# Frontend
+node_modules/
+dist/
