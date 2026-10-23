@@ -20,7 +20,7 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("SECRET_KEY", "replace-me")
+SECRET_KEY = os.environ["SECRET_KEY"]
 DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
@@ -76,11 +76,12 @@ ROOT_URLCONF = 'Backend.urls'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",]
 
-CELERY_BROKER_URL = 'redis://172.20.233.147:6379/0'
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL",'redis://localhost:6379/0')
 CELERY_BEAT_SCHEDULE = {
     'send-due-date-reminders-daily': {
         'task': 'tasks.tasks.send_due_date_reminders',
-        'schedule': crontab(hour=11, minute=49),  # every day at 8:00 AM
+        'schedule': crontab(hour=8, minute=00),  # every day at 8:00 AM
     },
 }
 
@@ -181,10 +182,9 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
 }
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 # ── HTTPS ──────────────────────────────────────────────────
 # HTTPS enforcement 
 
@@ -192,6 +192,9 @@ SECURE_SSL_REDIRECT = not DEBUG
 CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
