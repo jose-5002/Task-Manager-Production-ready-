@@ -10,15 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+from celery.schedules import crontab
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("SECRET_KEY", "replace-me")
+SECRET_KEY = os.environ["SECRET_KEY"]
 DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
@@ -66,13 +68,22 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],  
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated'),
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated',],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',   
 }
 
 ROOT_URLCONF = 'Backend.urls'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",]
+
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL",'redis://localhost:6379/0')
+CELERY_BEAT_SCHEDULE = {
+    'send-due-date-reminders-daily': {
+        'task': 'tasks.tasks.send_due_date_reminders',
+        'schedule': crontab(hour=8, minute=00),  # every day at 8:00 AM
+    },
+}
 
 TEMPLATES = [
     {
@@ -90,22 +101,31 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'ToDoList.wsgi.application'
+WSGI_APPLICATION = 'Backend.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
+if os.getenv('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+        )
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv("DB_PORT"),
+        }
+    }
+
 
 # DATABASES = {
 #     'default': {
@@ -147,13 +167,34 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+# ── STATIC FILES ───────────────────────────────────────────
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
+# Static files — Django's dev server won't be running in production,
+# so static files (admin CSS, DRF browsable API styling) need a real
+# way to be served. whitenoise is the simplest fix for this.
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR/ 'staticfiles'
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+}
+
+# ── HTTPS ──────────────────────────────────────────────────
+# HTTPS enforcement 
+
+SECURE_SSL_REDIRECT = not DEBUG
+CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

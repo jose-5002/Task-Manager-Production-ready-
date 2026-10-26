@@ -25,7 +25,7 @@ class CustomTokenPairSerializer(TokenObtainPairSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = '__all__'
+        fields = ['id', 'title', 'description', 'assigned_to', 'due_on', 'created_on', 'updated_on', 'completed', 'priority', 'tags']
         read_only_fields = ['owner','created_on', 'updated_on' ]
 
     def validate_due_on(self, value):
@@ -59,7 +59,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['username', 'email', 'password']
     
     def create(self, validated_data):
         user = User.objects.create_user(
