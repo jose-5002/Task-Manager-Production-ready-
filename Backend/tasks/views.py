@@ -60,7 +60,7 @@ class TaskViewSet(ModelViewSet):
         task.save()
         return Response({"message": f"Task assigned to {user.username}"}, status=status.HTTP_200_OK)
         
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsOwner, IsAuthenticated])
     def unassign(self, request, pk=None):
         task = self.get_object()
         task.assigned_to = None
