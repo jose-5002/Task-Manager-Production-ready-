@@ -36,6 +36,7 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
 # ALLOWED_HOSTS = []
 
+SIMPLE_JWT = {'ROTATE_REFRESH_TOKENS': True, 'BLACKLIST_AFTER_ROTATION': True,}
 
 # Application definition
 
