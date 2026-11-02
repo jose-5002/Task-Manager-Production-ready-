@@ -29,12 +29,7 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-xt#9+eek2j8tcjuti-u1bx!s10aa5oe)svt_y^0b3-rrd#xlvz'
 
-# # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-
-# ALLOWED_HOSTS = []
 
 SIMPLE_JWT = {'ROTATE_REFRESH_TOKENS': True, 'BLACKLIST_AFTER_ROTATION': True,}
 
