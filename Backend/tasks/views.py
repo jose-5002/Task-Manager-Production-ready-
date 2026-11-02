@@ -1,29 +1,20 @@
-from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from .permission import IsOwner, IsProfileOwner, IsActiveUser
+from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+from rest_framework import serializers, status
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework import status
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import OrderingFilter
+from rest_framework_simplejwt.views import (TokenObtainPairView,
+                                            TokenRefreshView)
 
-from .models import Task, Tag, Profile
-from rest_framework import serializers
-from .serializers import (
-    TaskSerializer,
-    TagSerializer,
-    CustomTokenPairSerializer,
-    RegisterUserSerializer,
-    ProfileSerializer,
-    AssignTaskSerializer,
-)
-from django.contrib.auth import get_user_model
-from drf_spectacular.utils import extend_schema, OpenApiResponse
-
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from .models import Profile, Tag, Task
+from .permission import IsActiveUser, IsOwner, IsProfileOwner
+from .serializers import (AssignTaskSerializer, CustomTokenPairSerializer,
+                          ProfileSerializer, RegisterUserSerializer,
+                          TagSerializer, TaskSerializer)
 
 User = get_user_model()
 

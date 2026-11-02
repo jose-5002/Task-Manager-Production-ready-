@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tasks', '0002_task_reminder_sent_alter_task_tags'),
+        ("tasks", "0002_task_reminder_sent_alter_task_tags"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='tags',
-            field=models.ManyToManyField(blank=True, related_name='tasks', to='tasks.tag'),
+            model_name="task",
+            name="tags",
+            field=models.ManyToManyField(
+                blank=True, related_name="tasks", to="tasks.tag"
+            ),
         ),
     ]
